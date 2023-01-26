@@ -16,7 +16,7 @@ gsutil mb -p ${PROJECT_ID} -c standard -l ${REGION} gs://${TERRAFORM_BUCKET_NAME
 gsutil versioning set on gs://${TERRAFORM_BUCKET_NAME}
 
 gcloud secrets create app-admin-user-password --locations $REGION --replication-policy user-managed
-echo -n "changeme" | gcloud beta secrets versions add app-admin-user-password --data-file=-
+echo -n "changeme" | gcloud secrets versions add app-admin-user-password --data-file=-
 
 terraform init \
   -backend-config="bucket=${TERRAFORM_BUCKET_NAME}" \
