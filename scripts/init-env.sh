@@ -12,7 +12,7 @@ gcloud services enable compute.googleapis.com \
   storage.googleapis.com \
   secretmanager.googleapis.com --project $PROJECT_ID
 
-gsutil mb -c standard -l ${REGION} gs://${TERRAFORM_BUCKET_NAME}
+gsutil mb -p ${PROJECT_ID} -c standard -l ${REGION} gs://${TERRAFORM_BUCKET_NAME}
 gsutil versioning set on gs://${TERRAFORM_BUCKET_NAME}
 
 gcloud beta secrets create app-admin-user-password --locations $REGION --replication-policy user-managed
