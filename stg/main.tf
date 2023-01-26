@@ -1,3 +1,8 @@
+provider "google" {
+  region  = var.region
+  project = var.project
+}
+
 terraform {
   required_version = ">=1.3.7"
   required_providers {
@@ -6,14 +11,9 @@ terraform {
       version = "4.50.0"
     }
   }
-#  backend "gcs" {
-#    bucket = "stately-lodge-375906-tfstate"
-#    prefix = "state"
-#  }
-}
-
-provider "google" {
-  region  = "asia-northeast1"
+  backend "gcs" {
+    bucket = "${var.project}-tfstate"
+  }
 }
 
 
@@ -29,7 +29,6 @@ module "network" {
   source = "../modules/network"
   project = var.project
   region = var.region
-  authorized_source_ranges = var.authorized_source_ranges
 }
 
 module "gke" {

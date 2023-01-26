@@ -37,20 +37,20 @@ resource "google_sql_database_instance" "mysql" {
   ]
 }
 
-data "google_secret_manager_secret_version" "wordpress-admin-user-password" {
+data "google_secret_manager_secret_version" "app_admin_user_password" {
   project = var.project
-  secret = "wordpress-admin-user-password"
+  secret = "app-admin-user-password"
 }
 
-resource "google_sql_database" "wordpress" {
-  name     = "wordpress"
+resource "google_sql_database" "app" {
+  name     = "app"
   project = var.project
   instance = google_sql_database_instance.mysql.name
 }
 
-resource "google_sql_user" "wordpress" {
-  name = "wordpress"
+resource "google_sql_user" "app" {
+  name = "app"
   project = var.project
   instance = google_sql_database_instance.mysql.name
-  password = data.google_secret_manager_secret_version.wordpress-admin-user-password.secret_data
+  password = data.google_secret_manager_secret_version.app_admin_user_password.secret_data
 }

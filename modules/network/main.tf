@@ -68,20 +68,6 @@ resource "google_compute_firewall" "mysql" {
   source_ranges = ["10.10.10.0/24"]
 }
 
-resource "google_compute_firewall" "web" {
-  name    = "allow-only-authorized-networks"
-  project = var.project
-  network = google_compute_network.custom.name
-
-  allow {
-    protocol = "tcp"
-  }
-
-  priority = 1000
-
-  source_ranges = var.authorized_source_ranges
-}
-
 resource "google_compute_address" "web" {
   name    = "web"
   project = var.project

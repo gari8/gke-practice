@@ -1,8 +1,8 @@
 #!/bin/sh
 
-export PROJECT_ID=stately-lodge-375906
+export PROJECT_ID=gke-sql-linker
 export REGION=asia-northeast1
-export TERRAFORM_BUCKET_NAME=stately-lodge-375906-tfstate
+export TERRAFORM_BUCKET_NAME=${PROJECT_ID}-tfstate
 gcloud config set project ${PROJECT_ID}
 
 gcloud services enable compute.googleapis.com \
@@ -15,8 +15,8 @@ gcloud services enable compute.googleapis.com \
 gsutil mb -c standard -l ${REGION} gs://${TERRAFORM_BUCKET_NAME}
 gsutil versioning set on gs://${TERRAFORM_BUCKET_NAME}
 
-gcloud beta secrets create wordpress-admin-user-password --locations $REGION --replication-policy user-managed
-echo -n "changeme" | gcloud beta secrets versions add wordpress-admin-user-password --data-file=-
+gcloud beta secrets create app-admin-user-password --locations $REGION --replication-policy user-managed
+echo -n "changeme" | gcloud beta secrets versions add app-admin-user-password --data-file=-
 
 terraform init \
   -backend-config="bucket=${TERRAFORM_BUCKET_NAME}" \

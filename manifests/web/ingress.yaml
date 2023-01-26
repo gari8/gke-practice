@@ -2,13 +2,13 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
-    kubernetes.io/ingress.global-static-ip-name: "wordpress"
+    kubernetes.io/ingress.global-static-ip-name: "app-api"
     kubernetes.io/ingress.class: "gce"
-  name: wordpress
+  name: app-api
 spec:
   defaultBackend:
     service:
-      name: wordpress
+      name: app-api
       port:
         number: 80
   rules:
@@ -18,6 +18,6 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: wordpress
+                name: app-api
                 port:
                   number: 80
