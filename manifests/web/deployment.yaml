@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: app-api
+  name: app
   labels:
-    app: app-api
+    app: app
 spec:
   selector:
     matchLabels:
-      app: app-api
+      app: app
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: app-api
+        app: app
     spec:
       containers:
         - image: wordpress
-          name: app-api
+          name: app
           env:
             - name: WORDPRESS_DB_HOST
               value: cloud-sql-proxy:3306
@@ -32,13 +32,14 @@ spec:
                   key: password
           ports:
             - containerPort: 80
-              name: app-api
+              name: app
           volumeMounts:
             - name: app-persistent-storage
               mountPath: /var/www/html
           livenessProbe:
-            initialDelaySeconds: 300
+            initialDelaySeconds: 30
             periodSeconds: 30
+            timeoutSeconds: 10
             httpGet:
               port: 80
               path: /wp-admin/install.php # at the very beginning, this is the only accessible page. Don't forget to change to /wp-login.php
@@ -56,4 +57,4 @@ spec:
       volumes:
         - name: app-persistent-storage
           persistentVolumeClaim:
-            claimName: app-api
+            claimName: app

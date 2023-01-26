@@ -68,6 +68,21 @@ resource "google_compute_firewall" "mysql" {
   source_ranges = ["10.10.10.0/24"]
 }
 
+resource "google_compute_firewall" "web" {
+  name    = "allow-all-networks"
+  project = var.project
+  network = google_compute_network.custom.name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["80", "8080"]
+  }
+
+  priority = 1000
+
+  source_ranges = ["0.0.0.0/0"]
+}
+
 resource "google_compute_address" "web" {
   name    = "web"
   project = var.project
