@@ -19,29 +19,12 @@ terraform {
   }
 }
 
-resource "google_secret_manager_secret" "password" {
-  secret_id = "app-admin-user-password"
-  replication {
-    user_managed {
-      replicas {
-        location = var.region
-      }
-    }
-  }
-}
-
-resource "google_secret_manager_secret_version" "password_version" {
-  secret      = google_secret_manager_secret.password.id
-  secret_data = "changeme"
-}
-
 module "database" {
   source                 = "../modules/database"
   private_network_id     = module.network.private_network_id
   private_vpc_connection = module.network.private_vpc_connection
   project                = var.project
   region                 = var.region
-  db_password            = google_secret_manager_secret_version.password_version.secret_data
 }
 
 module "network" {
@@ -59,7 +42,22 @@ module "gke" {
   cluster_name                   = var.cluster_name
   namespace                      = var.gke_namespace
   cloud_sql_instance_name        = module.database.cloud_sql_instance_name
-  circleci_service_account_email = google_service_account.circleci_account.email
+}
+
+module "api_repo" {
+  source                = "../modules/registry"
+  project               = var.project
+  region                = var.region
+  repository_id         = "${var.project}-api-repo"
+  service_account_email = google_service_account.circleci_account.email
+}
+
+module "admin_repo" {
+  source                = "../modules/registry"
+  project               = var.project
+  region                = var.region
+  repository_id         = "${var.project}-admin-repo"
+  service_account_email = google_service_account.circleci_account.email
 }
 
 resource "google_service_account" "circleci_account" {

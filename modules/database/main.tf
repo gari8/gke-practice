@@ -7,7 +7,7 @@ resource "random_string" "db_name_suffix" {
 resource "google_sql_database_instance" "mysql" {
   name             = "mysql-private-${random_string.db_name_suffix.result}"
   region           = var.region
-  project = var.project
+  project          = var.project
   database_version = var.mysql_database_version
   # とりあえず
   deletion_protection = false
@@ -17,19 +17,19 @@ resource "google_sql_database_instance" "mysql" {
     location_preference {
       zone = var.mysql_location_preference
     }
-    tier              = var.mysql_machine_type
-    disk_size         = var.mysql_default_disk_size
+    tier      = var.mysql_machine_type
+    disk_size = var.mysql_default_disk_size
 
     ip_configuration {
-      ipv4_enabled        = false
-      private_network     = var.private_network_id
+      ipv4_enabled    = false
+      private_network = var.private_network_id
     }
 
     # Backups
     backup_configuration {
       binary_log_enabled = true
-      enabled = true
-      start_time = "06:00"
+      enabled            = true
+      start_time         = "06:00"
     }
   }
   depends_on = [
@@ -37,20 +37,31 @@ resource "google_sql_database_instance" "mysql" {
   ]
 }
 
-data "google_secret_manager_secret_version" "app_admin_user_password" {
-  project = var.project
-  secret = "app-admin-user-password"
-}
-
-resource "google_sql_database" "app" {
+resource "google_sql_database" "mysql" {
   name     = "app"
-  project = var.project
+  project  = var.project
   instance = google_sql_database_instance.mysql.name
 }
 
-resource "google_sql_user" "app" {
-  name = "app"
-  project = var.project
+resource "google_sql_user" "mysql" {
+  name     = "app"
+  project  = var.project
   instance = google_sql_database_instance.mysql.name
-  password = data.google_secret_manager_secret_version.app_admin_user_password.secret_data
+  password = google_secret_manager_secret_version.password_version.secret_data
+}
+
+resource "google_secret_manager_secret" "password" {
+  secret_id = "app-admin-user-password"
+  replication {
+    user_managed {
+      replicas {
+        location = var.region
+      }
+    }
+  }
+}
+
+resource "google_secret_manager_secret_version" "password_version" {
+  secret      = google_secret_manager_secret.password.id
+  secret_data = "changeme"
 }

@@ -2,17 +2,17 @@ resource "google_compute_network" "custom" {
   name                    = "custom"
   auto_create_subnetworks = "false"
   routing_mode            = "GLOBAL"
-  project = var.project
+  project                 = var.project
 }
 
 resource "google_compute_subnetwork" "web" {
   name          = "web"
-  project = var.project
+  project       = var.project
   ip_cidr_range = "10.10.10.0/24"
   network       = google_compute_network.custom.id
   region        = var.region
 
-  secondary_ip_range  = [
+  secondary_ip_range = [
     {
       range_name    = "services"
       ip_cidr_range = "10.10.11.0/24"
@@ -30,7 +30,7 @@ resource "google_compute_subnetwork" "data" {
   name          = "data"
   ip_cidr_range = "10.20.10.0/24"
   network       = google_compute_network.custom.id
-  project = var.project
+  project       = var.project
   region        = var.region
 
   private_ip_google_access = true
@@ -38,7 +38,7 @@ resource "google_compute_subnetwork" "data" {
 
 resource "google_compute_global_address" "private_ip_peering" {
   name          = "google-managed-services-custom"
-  project = var.project
+  project       = var.project
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 24
@@ -97,14 +97,14 @@ resource "google_compute_router" "web" {
 
 resource "google_compute_router_nat" "web" {
   name                               = "web"
-  project = var.project
+  project                            = var.project
   router                             = google_compute_router.web.name
   nat_ip_allocate_option             = "MANUAL_ONLY"
-  nat_ips                            = [ google_compute_address.web.self_link ]
+  nat_ips                            = [google_compute_address.web.self_link]
   source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
   subnetwork {
     name                    = google_compute_subnetwork.web.id
     source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
   }
-  depends_on                         = [ google_compute_address.web ]
+  depends_on = [google_compute_address.web]
 }

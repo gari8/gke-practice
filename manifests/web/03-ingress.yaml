@@ -4,13 +4,8 @@ metadata:
   annotations:
     kubernetes.io/ingress.global-static-ip-name: "app"
     kubernetes.io/ingress.class: "gce"
-  name: app
+  name: api
 spec:
-  defaultBackend:
-    service:
-      name: app
-      port:
-        number: 80
   rules:
     - http:
         paths:
@@ -18,6 +13,13 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: app
+                name: api
                 port:
                   number: 80
+          - path: /admin
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: admin
+                port:
+                  number: 3000

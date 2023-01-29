@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  labels:
+    app: api
+spec:
+  selector:
+    matchLabels:
+      app: api
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - image: asia-northeast1-docker.pkg.dev/gke-app-artifacts/gke-app-artifacts-api-repo/api:latest
+          name: api
+          env:
+            - name: DB_HOST
+              value: cloud-sql-proxy
+            - name: DB_USER
+              value: app
+            - name: DB_NAME
+              value: app
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: password
+          ports:
+            - containerPort: 8080
+              name: api
+          livenessProbe:
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+            httpGet:
+              port: 8080
+              path: / # at the very beginning, this is the only accessible page. Don't forget to change to /wp-login.php
+          readinessProbe:
+            httpGet:
+              port: 8080
+              path: /
+          resources:
+            requests:
+              cpu: 1000m
+              memory: 1Gi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin
+  labels:
+    app: admin
+spec:
+  selector:
+    matchLabels:
+      app: admin
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: admin
+    spec:
+      containers:
+        - image: asia-northeast1-docker.pkg.dev/gke-app-artifacts/gke-app-artifacts-api-repo/api:latest
+          name: admin
+          env:
+            - name: DB_HOST
+              value: cloud-sql-proxy
+            - name: DB_USER
+              value: app
+            - name: DB_NAME
+              value: app
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: password
+          ports:
+            - containerPort: 8080
+              name: admin
+          livenessProbe:
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+            httpGet:
+              port: 8080
+              path: /
+          readinessProbe:
+            httpGet:
+              port: 8080
+              path: /
+          resources:
+            requests:
+              cpu: 1000m
+              memory: 1Gi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
